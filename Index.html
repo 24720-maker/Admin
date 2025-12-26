@@ -2,221 +2,524 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS ARENA | Ultra Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RS ARENA PRO-X | สมรภูมิประลองอัจฉริยะ</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+                    colors: { neon: '#00F2FF', game: '#7C3AED', dark: '#020617', gold: '#FFD700', surface: '#0F172A' }
+                }
+            }
+        }
+    </script>
+
     <style>
-        * { -webkit-tap-highlight-color: transparent; }
-        body { background: #050505; color: #fff; font-family: 'Prompt', sans-serif; height: 100vh; overflow: hidden; }
-        .cyber-bg { background: radial-gradient(circle at center, #1e1b4b 0%, #050505 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .choice-btn { transition: 0.15s; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); }
-        .choice-btn:active { transform: scale(0.9); background: #7C3AED; }
-        .choice-btn.active { background: #7C3AED; border-color: #fff; box-shadow: 0 0 30px #7C3AED; }
-        .ready-badge { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* 🎨 Custom Premium Styles */
+        :root { --game-purple: #7C3AED; --neon-cyan: #00F2FF; }
+        * { -webkit-tap-highlight-color: transparent; outline: none !important; -webkit-user-select: none; user-select: none; }
+        body { background-color: #020617; color: #f1f5f9; height: 100vh; overflow: hidden; }
+        
+        .bg-cyber { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-dark { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(124, 58, 237, 0.2); }
+        
+        /* ⚡ Animations */
+        .btn-hover { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hover:active { transform: scale(0.92); filter: brightness(1.2); }
+        
+        .choice-card { transition: 0.3s all; cursor: pointer; position: relative; overflow: hidden; }
+        .choice-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); transform: translateX(-100%); transition: 0.5s; }
+        .choice-card:hover::before { transform: translateX(100%); }
+        .choice-card.active { background: var(--game-purple); border-color: #fff; transform: translateY(-8px) scale(1.05); box-shadow: 0 15px 30px rgba(124, 58, 237, 0.5); }
+
+        .vs-glow { animation: vs-glow 2s infinite; font-family: 'Outfit', sans-serif; }
+        @keyframes vs-glow { 0%, 100% { text-shadow: 0 0 10px var(--game-purple); transform: scale(1); } 50% { text-shadow: 0 0 30px var(--neon-cyan); transform: scale(1.1); } }
+
+        .shimmer { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* 🏆 Winner/Loser Effects */
+        .status-ready { background: linear-gradient(to right, #10B981, #34D399); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="cyber-bg flex flex-col">
+<body class="bg-cyber flex flex-col font-sans">
 
-    <div id="loader" class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center">
-        <div class="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
-        <p class="mt-4 text-purple-500 font-bold text-[10px] tracking-widest animate-pulse">BOOTING SYSTEM...</p>
+    <div id="loader" class="fixed inset-0 z-[1000] bg-dark flex flex-col items-center justify-center transition-all duration-700">
+        <div class="relative w-24 h-24 mb-8">
+            <div class="absolute inset-0 border-[6px] border-game/10 rounded-full"></div>
+            <div class="absolute inset-0 border-[6px] border-neon rounded-full border-t-transparent animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i class="fas fa-gamepad text-neon text-3xl animate-pulse"></i>
+            </div>
+        </div>
+        <div class="text-center">
+            <p class="text-neon font-black tracking-[0.4em] text-[11px] uppercase">RS PRO-X DUEL ENGINE</p>
+            <p class="text-slate-500 text-[9px] mt-2 uppercase font-bold">Secure Data Synchronization...</p>
+        </div>
     </div>
 
-    <div id="authView" class="hidden fixed inset-0 z-50 flex flex-col justify-center items-center p-10 bg-black">
-        <h1 class="text-6xl font-black italic font-display mb-10 tracking-tighter">RS<span class="text-purple-500">.</span>ARENA</h1>
-        <form onsubmit="app.login(event)" class="w-full max-w-xs space-y-4">
-            <input id="lUser" class="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-white font-bold text-center" placeholder="รหัสผู้เล่น RSxxxx">
-            <input id="lPass" type="password" class="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-white font-bold text-center" placeholder="รหัสผ่าน">
-            <button class="w-full bg-purple-600 py-5 rounded-3xl font-black uppercase tracking-widest shadow-xl">Connect Arena</button>
+    <div id="authView" class="hidden fixed inset-0 z-50 p-10 flex flex-col justify-center items-center">
+        <div class="text-center mb-12 fade-in">
+            <div class="w-24 h-24 bg-game rounded-[2.5rem] mx-auto flex items-center justify-center shadow-2xl shadow-game/40 rotate-3 mb-8">
+                <i class="fas fa-bolt-lightning text-white text-5xl"></i>
+            </div>
+            <h1 class="text-6xl font-black text-white italic font-display tracking-tighter">RS<span class="text-neon">.</span>ARENA</h1>
+            <p class="text-slate-500 font-bold uppercase tracking-[0.4em] text-[10px] mt-2">The Ultimate High-StakeDuel</p>
+        </div>
+        
+        <form onsubmit="app.login(event)" class="w-full max-w-sm space-y-4">
+            <div class="group relative">
+                <i class="fas fa-id-badge absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-neon transition-colors"></i>
+                <input id="lUser" type="text" spellcheck="false" class="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-[2rem] text-white font-bold placeholder:text-slate-600 focus:border-neon focus:bg-white/10 outline-none transition-all" placeholder="ENTER RS ID">
+            </div>
+            <div class="group relative">
+                <i class="fas fa-key absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-neon transition-colors"></i>
+                <input id="lPass" type="password" class="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-[2rem] text-white font-bold placeholder:text-slate-600 focus:border-neon focus:bg-white/10 outline-none transition-all" placeholder="ENTER PASSWORD">
+            </div>
+            <button class="w-full bg-game text-white py-6 rounded-[2rem] font-black uppercase tracking-widest text-sm btn-hover shadow-2xl shadow-game/30">Connect Terminal</button>
+            <div class="pt-4 flex items-center justify-center gap-2">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Global Server: Online</span>
+            </div>
         </form>
     </div>
 
     <div id="lobbyView" class="hidden flex-1 flex flex-col overflow-hidden">
-        <header class="p-6 flex justify-between items-center border-b border-white/5">
-            <div><p class="text-[9px] text-slate-500 font-bold uppercase">Combatant</p><h2 id="pName" class="text-xl font-black italic">...</h2></div>
-            <div class="text-right"><p class="text-[9px] text-purple-500 font-bold uppercase">Balance</p><h2 id="pBal" class="text-xl font-black italic text-purple-400">฿ 0.00</h2></div>
+        <header class="p-8 flex justify-between items-end border-b border-white/5 bg-black/20 backdrop-blur-xl">
+            <div>
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Authenticated Combatant</p>
+                <h2 id="pName" class="text-2xl font-black text-white italic tracking-tight">...</h2>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] text-neon font-black uppercase tracking-widest mb-1">Available Credits</p>
+                <h2 id="pBal" class="text-3xl font-black text-white italic font-display">฿ 0.00</h2>
+            </div>
         </header>
-        <main class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar pb-24">
-            <h3 class="text-xs font-black uppercase text-slate-500 tracking-widest">Active Battles</h3>
-            <div id="roomList" class="grid gap-4"></div>
+
+        <main class="flex-1 overflow-y-auto px-6 py-8 no-scrollbar pb-32">
+            <div class="flex justify-between items-center mb-10 px-2">
+                <div>
+                    <h3 class="text-2xl font-black text-white italic uppercase tracking-tighter">Live Lobby</h3>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase mt-1">Select a table to start dueling</p>
+                </div>
+                <button onclick="location.reload()" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-slate-400"><i class="fas fa-sync-alt"></i></button>
+            </div>
+
+            <div id="roomList" class="grid grid-cols-1 gap-5">
+                <div class="shimmer h-32 rounded-[2.5rem] opacity-20"></div>
+                <div class="shimmer h-32 rounded-[2.5rem] opacity-20"></div>
+                <div class="shimmer h-32 rounded-[2.5rem] opacity-20"></div>
+            </div>
         </main>
+
+        <nav class="fixed bottom-0 w-full p-6 pb-10 bg-black/80 backdrop-blur-2xl border-t border-white/5 flex gap-4">
+            <button onclick="app.logout()" class="flex-1 py-4 bg-white/5 rounded-2xl font-black text-[10px] text-rose-500 uppercase tracking-[0.2em] border border-rose-500/20 btn-hover">Disconnect</button>
+        </nav>
     </div>
 
-    <div id="arenaView" class="hidden fixed inset-0 z-[100] bg-black flex flex-col p-6">
-        <div class="flex justify-between items-center mb-10">
-            <button onclick="game.exit()" class="text-[10px] font-black uppercase text-slate-500"><i class="fas fa-times mr-2"></i> Quit</button>
-            <div class="text-center"><p id="roomName" class="text-xs font-black text-purple-500 uppercase">Room</p><p id="roomBet" class="text-[9px] text-slate-500 font-bold">STAKE: 0</p></div>
-            <i class="fas fa-bolt text-purple-500"></i>
-        </div>
+    <div id="arenaView" class="hidden fixed inset-0 z-[100] bg-black flex flex-col">
+        <div class="absolute inset-0 bg-cyber opacity-40"></div>
+        
+        <header class="relative p-6 flex justify-between items-center z-10 border-b border-white/5 bg-black/20">
+            <button onclick="game.exit()" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-slate-400 btn-hover"><i class="fas fa-chevron-left"></i></button>
+            <div class="text-center">
+                <p id="roomName" class="text-xs font-black uppercase tracking-[0.3em] text-neon">ARENA TERMINAL</p>
+                <p id="roomBet" class="text-[10px] font-bold text-white/40 uppercase mt-0.5 tracking-widest">Stake: ฿0</p>
+            </div>
+            <div class="w-12 h-12 flex items-center justify-center"><i class="fas fa-shield-halved text-game text-xl"></i></div>
+        </header>
 
-        <div class="flex-1 flex flex-col justify-between items-center py-10">
-            <div id="opp-box" class="text-center opacity-20 scale-90 transition-all duration-500">
-                <div class="w-24 h-24 bg-white/5 rounded-[2.5rem] border-2 border-white/10 flex items-center justify-center relative mb-2 mx-auto">
-                    <i id="opp-icon" class="fas fa-user-ninja text-3xl text-white/20"></i>
-                    <div id="opp-ready" class="hidden absolute inset-0 bg-emerald-500/80 flex items-center justify-center text-[10px] font-black italic rounded-[2.5rem]">READY</div>
+        <div class="relative flex-1 flex flex-col justify-around items-center z-10 px-8 py-4">
+            
+            <div id="opp-box" class="text-center transition-all duration-700 opacity-20 scale-90">
+                <div class="relative mb-4">
+                    <div id="opp-frame" class="w-28 h-28 bg-white/5 rounded-[3rem] border-2 border-white/10 flex items-center justify-center relative overflow-hidden shadow-2xl">
+                        <i id="opp-icon" class="fas fa-user-ninja text-white/10 text-5xl"></i>
+                        <div id="opp-ready-tag" class="hidden absolute inset-0 status-ready flex flex-col items-center justify-center text-[11px] font-black text-white italic">
+                            <i class="fas fa-check-circle mb-1"></i>
+                            READY
+                        </div>
+                    </div>
+                    <div id="opp-status-badge" class="hidden absolute -bottom-3 left-1/2 -translate-x-1/2 bg-game text-[9px] px-4 py-2 rounded-full font-black animate-bounce shadow-xl border border-white/20 uppercase tracking-widest">PICKING...</div>
                 </div>
-                <p id="opp-name" class="text-[10px] font-black uppercase text-slate-500">Waiting...</p>
+                <div>
+                    <p id="opp-name" class="text-[11px] font-black uppercase text-white/60 tracking-[0.2em]">Waiting for Rival</p>
+                    <div class="flex items-center justify-center gap-1 mt-2">
+                        <div id="opp-score-dots" class="flex gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-white/10"></div>
+                            <div class="w-2 h-2 rounded-full bg-white/10"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="text-4xl font-black italic font-display text-purple-500 animate-pulse">VS</div>
+            <div class="flex flex-col items-center w-full max-w-[200px]">
+                <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-game to-transparent"></div>
+                <div class="text-5xl font-black italic vs-glow my-3 text-white">VS</div>
+                <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-neon to-transparent"></div>
+            </div>
 
             <div class="text-center">
-                <div class="w-32 h-32 glass rounded-[3rem] border-2 border-purple-500/50 flex items-center justify-center relative mb-4 mx-auto shadow-2xl shadow-purple-500/20">
-                    <i id="my-choice-icon" class="fas fa-user text-5xl"></i>
-                    <div id="my-ready" class="hidden absolute inset-0 bg-purple-600 flex items-center justify-center text-xs font-black italic rounded-[3rem]">READY</div>
+                <div class="flex flex-col items-center mb-4">
+                    <div id="my-frame" class="w-36 h-36 glass rounded-[3.5rem] border-4 border-neon/30 flex items-center justify-center shadow-2xl relative overflow-hidden transition-all">
+                        <i id="my-choice-icon" class="fas fa-user-astronaut text-white text-6xl"></i>
+                        <div id="my-ready-tag" class="hidden absolute inset-0 bg-neon flex flex-col items-center justify-center text-xs font-black text-black italic">
+                            <i class="fas fa-shield-check text-xl mb-1"></i>
+                            PREPARED
+                        </div>
+                    </div>
                 </div>
-                <p class="text-xs font-black uppercase tracking-widest">YOU</p>
+                <p class="text-xs font-black uppercase text-white tracking-[0.4em]">YOU (COMBATANT)</p>
             </div>
 
-            <div class="w-full max-w-xs space-y-4">
-                <button id="readyBtn" onclick="game.readyUp()" class="w-full bg-white text-black py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm">กดเพื่อพร้อมเล่น</button>
-                <div id="choices" class="hidden grid grid-cols-3 gap-4">
-                    <button onclick="game.pick('rock')" id="btn-rock" class="choice-btn h-24 rounded-3xl text-3xl"><i class="fas fa-hand-back-fist"></i></button>
-                    <button onclick="game.pick('paper')" id="btn-paper" class="choice-btn h-24 rounded-3xl text-3xl"><i class="fas fa-hand-paper"></i></button>
-                    <button onclick="game.pick('scissors')" id="btn-scissors" class="choice-btn h-24 rounded-3xl text-3xl"><i class="fas fa-hand-scissors"></i></button>
+            <div id="gameActions" class="w-full max-w-sm">
+                <button id="readyBtn" onclick="game.readyUp()" class="w-full bg-white text-black py-7 rounded-[2.5rem] font-black uppercase tracking-[0.3em] text-sm btn-hover shadow-2xl shadow-white/10 flex items-center justify-center gap-3">
+                    <i class="fas fa-play"></i> CONFIRM READY
+                </button>
+                
+                <div id="choices" class="hidden grid grid-cols-3 gap-6 animate-in">
+                    <button onclick="game.pick('rock')" id="btn-rock" class="choice-card h-32 rounded-[2.5rem] glass flex items-center justify-center text-5xl text-white btn-hover"><i class="fas fa-hand-back-fist"></i></button>
+                    <button onclick="game.pick('paper')" id="btn-paper" class="choice-card h-32 rounded-[2.5rem] glass flex items-center justify-center text-5xl text-white btn-hover"><i class="fas fa-hand-paper"></i></button>
+                    <button onclick="game.pick('scissors')" id="btn-scissors" class="choice-card h-32 rounded-[2.5rem] glass flex items-center justify-center text-5xl text-white btn-hover"><i class="fas fa-hand-scissors"></i></button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="hidden fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-10 animate-in">
+        <div class="text-center space-y-8">
+            <h1 id="res-title" class="text-7xl font-black italic font-display tracking-tighter">VICTORY</h1>
+            <div class="flex justify-center items-center gap-10">
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-4">YOU</p>
+                    <div id="res-me-icon" class="text-7xl"></div>
+                </div>
+                <div class="text-2xl font-black italic text-game">VS</div>
+                <div class="text-center">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-4">RIVAL</p>
+                    <div id="res-opp-icon" class="text-7xl text-slate-700"></div>
+                </div>
+            </div>
+            <div id="res-prize" class="text-3xl font-black italic text-neon">+ ฿ 200.00</div>
+            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse">Synchronizing Balance...</p>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, runTransaction, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Firebase Configuration
         const firebaseConfig = { apiKey: "AIzaSyBNfTBQthLLRbJP9BXZ-UQptFsdU324Mv0", authDomain: "fafada-d9899.firebaseapp.com", projectId: "fafada-d9899", storageBucket: "fafada-d9899.firebasestorage.app", messagingSenderId: "484777586908", appId: "1:484777586908:web:16a8f0367ad15737364419" };
         const fb_app = initializeApp(firebaseConfig);
-        const auth = getAuth(fb_app);
         const db = getFirestore(fb_app);
 
-        let userUID = null, userData = null, unsubRoom = null, currentRoomId = null;
+        let userUID = null, userData = null, unsubRoom = null, currentRoomId = null, isJudging = false;
+
+        // UI Helpers
+        const ui = {
+            show: (id) => { document.getElementById(id).classList.remove('hidden'); },
+            hide: (id) => { document.getElementById(id).classList.add('hidden'); },
+            setReadyBtn: (text, loading = false) => {
+                const btn = document.getElementById('readyBtn');
+                btn.innerHTML = loading ? `<i class="fas fa-spinner animate-spin"></i> SYNCING...` : text;
+                btn.disabled = loading;
+            }
+        };
 
         window.app = {
             login: async (e) => {
                 e.preventDefault();
                 const u = document.getElementById('lUser').value.trim();
                 const p = document.getElementById('lPass').value.trim();
-                Swal.showLoading();
-                const q = query(collection(db, "users"), where("gameUser", "==", u), where("gamePass", "==", p));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    userUID = snap.docs[0].id;
-                    app.initSession();
-                } else { Swal.fire('Error', 'รหัสไม่ถูกต้อง', 'error'); }
+                if(!u || !p) return;
+
+                ui.show('loader');
+                try {
+                    // Optimized Login Search
+                    const q = query(collection(db, "users"), where("gameUser", "==", u));
+                    const snap = await getDocs(q);
+
+                    if (!snap.empty) {
+                        const userDoc = snap.docs[0];
+                        if(userDoc.data().gamePass === p) {
+                            userUID = userDoc.id;
+                            localStorage.setItem('rs_pro_uid', userUID);
+                            app.initSession();
+                        } else {
+                            Swal.fire('ACCESS DENIED', 'Invalid Password', 'error');
+                            ui.hide('loader');
+                        }
+                    } else {
+                        Swal.fire('NOT FOUND', 'RS ID does not exist', 'error');
+                        ui.hide('loader');
+                    }
+                } catch(e) { 
+                    ui.hide('loader');
+                    Swal.fire('DB ERROR', 'Connection failed', 'error'); 
+                }
             },
+
             initSession: () => {
-                document.getElementById('authView').classList.add('hidden');
-                document.getElementById('lobbyView').classList.remove('hidden');
-                document.getElementById('loader').classList.add('hidden');
+                ui.hide('authView');
+                ui.show('lobbyView');
+                ui.hide('loader');
+
+                // Core Real-time Sync
                 onSnapshot(doc(db, "users", userUID), s => {
-                    userData = s.data();
-                    document.getElementById('pName').innerText = userData.displayName;
-                    document.getElementById('pBal').innerText = "฿ " + Number(userData.balance).toLocaleString();
+                    if(s.exists()){
+                        userData = s.data();
+                        document.getElementById('pName').innerText = userData.displayName || userData.gameUser;
+                        document.getElementById('pBal').innerText = "฿ " + Number(userData.balance).toLocaleString(undefined, {minimumFractionDigits: 2});
+                    }
                 });
                 game.loadLobby();
+            },
+
+            logout: () => {
+                localStorage.removeItem('rs_pro_uid');
+                location.reload();
             }
         };
 
         window.game = {
             loadLobby: () => {
-                onSnapshot(collection(db, "rooms"), s => {
+                onSnapshot(query(collection(db, "rooms"), orderBy("createdAt", "desc")), s => {
                     const list = document.getElementById('roomList'); list.innerHTML = '';
+                    if(s.empty) {
+                        list.innerHTML = `<div class="py-20 text-center opacity-20"><i class="fas fa-ghost text-4xl mb-4"></i><p class="text-xs font-bold uppercase tracking-widest">No active tables</p></div>`;
+                        return;
+                    }
                     s.forEach(d => {
                         const r = d.data();
-                        list.innerHTML += `<div onclick="game.join('${d.id}', '${r.pass}')" class="glass p-7 rounded-[2.5rem] flex justify-between items-center transition-all active:scale-95">
-                            <div><p class="text-[9px] text-purple-500 font-bold mb-1">ROOM: ${r.name}</p><p class="text-2xl font-black italic">฿${r.bet}</p></div>
-                            <span class="text-[9px] font-black px-4 py-2 rounded-full ${r.p2?'bg-white/5':'bg-purple-500 text-white'} uppercase">${r.p2?'เต็ม':'เข้าเล่น'}</span>
+                        const isFull = r.p1 && r.p2;
+                        list.innerHTML += `<div onclick="game.join('${d.id}', '${r.pass}')" class="glass p-8 rounded-[2.5rem] flex justify-between items-center btn-hover border-white/5 group">
+                            <div class="flex items-center gap-6">
+                                <div class="w-14 h-14 rounded-2xl bg-game/10 flex items-center justify-center text-game text-xl group-hover:bg-game group-hover:text-white transition-all"><i class="fas fa-gamepad"></i></div>
+                                <div><p class="text-[10px] text-neon font-black mb-1 uppercase tracking-widest">${r.name}</p><p class="text-3xl font-black italic">฿${Number(r.bet).toLocaleString()}</p></div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-black px-5 py-2.5 rounded-full ${isFull ? 'bg-rose-500/10 text-rose-500 border-rose-500/20':'bg-neon/10 text-neon border-neon/20'} border uppercase tracking-widest">${isFull ? 'FULL':'OPEN'}</span>
+                            </div>
                         </div>`;
                     });
                 });
             },
+
             join: async (id, pass) => {
-                const { value: p } = await Swal.fire({ title: 'ACCESS CODE', input: 'password', background: '#000', color: '#fff', confirmButtonColor: '#7C3AED' });
+                const { value: p } = await Swal.fire({ 
+                    title: 'SECURE ACCESS', 
+                    html: '<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Enter Table Password</p>',
+                    input: 'password', 
+                    background: '#0F172A', 
+                    color: '#fff', 
+                    confirmButtonColor: '#7C3AED',
+                    inputAttributes: { autocapitalize: 'off',  autocorrect: 'off' }
+                });
+
                 if(p === pass) {
+                    if(userData.balance < 1) return Swal.fire('INSUFFICIENT', 'Please deposit credits first', 'error');
+                    
+                    const rSnap = await getDoc(doc(db, "rooms", id));
+                    const r = rSnap.data();
+                    if(r.p1 && r.p2 && r.p1.uid !== userUID && r.p2.uid !== userUID) return Swal.fire('ROOM FULL', 'This battle is already in progress', 'warning');
+
                     currentRoomId = id;
-                    const rSnap = await getDoc(doc(db, "rooms", id)); const r = rSnap.data();
-                    const field = !r.p1 || r.p1.uid === userUID ? "p1" : "p2";
-                    await updateDoc(doc(db, "rooms", id), { [field]: { uid: userUID, name: userData.displayName, ready: false, choice: null } });
-                    document.getElementById('arenaView').classList.remove('hidden');
+                    isJudging = false;
+                    const field = (!r.p1 || r.p1.uid === userUID) ? "p1" : "p2";
+                    
+                    await updateDoc(doc(db, "rooms", id), { 
+                        [field]: { uid: userUID, name: userData.displayName || userData.gameUser, ready: false, choice: null, score: 0 } 
+                    });
+
+                    ui.show('arenaView');
                     game.listenRoom(id);
+                } else if(p !== undefined) {
+                    Swal.fire('INVALID', 'Access code incorrect', 'error');
                 }
             },
+
             listenRoom: (id) => {
                 unsubRoom = onSnapshot(doc(db, "rooms", id), s => {
-                    const r = s.data(); if(!r) return;
-                    document.getElementById('roomName').innerText = r.name;
-                    document.getElementById('roomBet').innerText = "STAKE: " + r.bet;
-                    const isP1 = r.p1 && r.p1.uid === userUID;
-                    const me = isP1 ? r.p1 : r.p2; const opp = isP1 ? r.p2 : r.p1;
+                    const r = s.data(); 
+                    if(!r) { if(currentRoomId) game.exit(); return; }
                     
-                    document.getElementById('my-ready').classList.toggle('hidden', !me?.ready);
+                    document.getElementById('roomName').innerText = r.name || "BATTLE TERMINAL";
+                    document.getElementById('roomBet').innerText = `STAKE: ฿${Number(r.bet).toLocaleString()}`;
+                    
+                    const isP1 = r.p1 && r.p1.uid === userUID;
+                    const me = isP1 ? r.p1 : r.p2; 
+                    const opp = isP1 ? r.p2 : r.p1;
+
+                    // Update Me
+                    document.getElementById('my-ready-tag').classList.toggle('hidden', !me?.ready);
+                    document.getElementById('my-frame').style.borderColor = me?.ready ? '#00F2FF' : 'rgba(255,255,255,0.1)';
+                    
+                    // Update Rival
                     if(opp) {
-                        document.getElementById('opp-box').classList.remove('opacity-20', 'scale-90');
+                        ui.show('opp-box');
+                        document.getElementById('opp-box').style.opacity = "1";
+                        document.getElementById('opp-box').style.transform = "scale(1)";
                         document.getElementById('opp-name').innerText = opp.name;
-                        document.getElementById('opp-ready').classList.toggle('hidden', !opp.ready);
-                        document.getElementById('opp-icon').className = opp.choice ? "fas fa-check-double text-purple-500 animate-pulse text-3xl" : "fas fa-user-ninja text-white/20 text-3xl";
+                        document.getElementById('opp-ready-tag').classList.toggle('hidden', !opp.ready);
+                        document.getElementById('opp-status-badge').classList.toggle('hidden', !opp.choice || (r.p1.choice && r.p2.choice));
+                        document.getElementById('opp-icon').className = opp.choice ? "fas fa-shield-check text-neon text-5xl" : "fas fa-user-ninja text-white/20 text-5xl";
+                        document.getElementById('opp-frame').style.borderColor = opp.ready ? '#10B981' : 'rgba(255,255,255,0.1)';
+                    } else {
+                        document.getElementById('opp-box').style.opacity = "0.2";
+                        document.getElementById('opp-name').innerText = "Waiting Rival";
                     }
 
+                    // Game State Management
                     if(r.p1?.ready && r.p2?.ready) {
-                        document.getElementById('readyBtn').classList.add('hidden');
-                        document.getElementById('choices').classList.remove('hidden');
-                        if(r.p1.choice && r.p2.choice) game.judge(id, r);
+                        ui.hide('readyBtn');
+                        ui.show('choices');
+                        if(r.p1.choice && r.p2.choice && !isJudging) game.judge(id, r);
                     } else {
-                        document.getElementById('readyBtn').classList.remove('hidden');
-                        document.getElementById('choices').classList.add('hidden');
+                        ui.show('readyBtn');
+                        ui.hide('choices');
+                        ui.setReadyBtn(me?.ready ? "WAITING FOR RIVAL..." : "CONFIRM READY");
+                        if(me?.ready) document.getElementById('readyBtn').classList.add('opacity-50', 'pointer-events-none');
+                        else document.getElementById('readyBtn').classList.remove('opacity-50', 'pointer-events-none');
                     }
                 });
             },
+
             readyUp: async () => {
+                ui.setReadyBtn("", true);
                 const rSnap = await getDoc(doc(db, "rooms", currentRoomId));
-                if(userData.balance < rSnap.data().bet) return Swal.fire('Error', 'เงินไม่พอ', 'error');
-                await runTransaction(db, async(t) => {
-                    const uRef = doc(db, "users", userUID);
-                    t.update(uRef, { balance: (await t.get(uRef)).data().balance - rSnap.data().bet });
-                    t.update(doc(db, "rooms", currentRoomId), { [rSnap.data().p1.uid === userUID ? "p1.ready" : "p2.ready"]: true });
+                const r = rSnap.data();
+
+                try {
+                    await runTransaction(db, async(t) => {
+                        const uRef = doc(db, "users", userUID);
+                        const uSnap = await t.get(uRef);
+                        const bal = Number(uSnap.data().balance);
+                        const bet = Number(r.bet);
+
+                        if(bal < bet) throw "Insufficient Balance";
+                        
+                        t.update(uRef, { balance: bal - bet });
+                        const isP1 = r.p1.uid === userUID;
+                        t.update(doc(db, "rooms", currentRoomId), { 
+                            [isP1 ? "p1.ready" : "p2.ready"]: true 
+                        });
+                    });
+                } catch(e) {
+                    ui.setReadyBtn("CONFIRM READY");
+                    Swal.fire('FAILED', e === "Insufficient Balance" ? "ยอดเงินไม่เพียงพอ" : "System Busy", 'error');
+                }
+            },
+
+            pick: async (c) => {
+                // Instant Feedback (Optimistic)
+                document.querySelectorAll('.choice-card').forEach(el => el.classList.remove('active'));
+                document.getElementById(`btn-${c}`).classList.add('active');
+                document.getElementById('choices').style.pointerEvents = 'none';
+                document.getElementById('choices').style.opacity = '0.5';
+
+                const rSnap = await getDoc(doc(db, "rooms", currentRoomId));
+                const isP1 = rSnap.data().p1.uid === userUID;
+                await updateDoc(doc(db, "rooms", currentRoomId), { 
+                    [isP1 ? "p1.choice" : "p2.choice"]: c 
                 });
             },
-            pick: async (c) => {
-                document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('btn-'+c).classList.add('active');
-                const isP1 = (await getDoc(doc(db, "rooms", currentRoomId))).data().p1.uid === userUID;
-                await updateDoc(doc(db, "rooms", currentRoomId), { [isP1 ? "p1.choice" : "p2.choice"]: c });
-                document.getElementById('choices').style.pointerEvents = 'none';
-            },
+
             judge: async (id, r) => {
+                isJudging = true;
                 const p1 = r.p1.choice, p2 = r.p2.choice;
-                const win = p1 === p2 ? 'draw' : ((p1==='rock'&&p2==='scissors')||(p1==='paper'&&p2==='rock')||(p1==='scissors'&&p2==='paper') ? 'p1' : 'p2');
-                Swal.fire({ title: 'REVEAL!', html: `<div class="flex justify-around text-5xl my-10"><i class="fas fa-hand-${p1==='rock'?'back-fist':p1}"></i> <i class="fas fa-hand-${p2==='rock'?'back-fist':p2}"></i></div>`, timer: 2500, showConfirmButton: false, background:'#000', color:'#fff' });
+                const icons = { rock: 'hand-back-fist', paper: 'hand-paper', scissors: 'hand-scissors' };
+                
+                let win = 'draw';
+                if(p1 !== p2) {
+                    if((p1==='rock'&&p2==='scissors')||(p1==='paper'&&p2==='rock')||(p1==='scissors'&&p2==='paper')) win = 'p1';
+                    else win = 'p2';
+                }
+
+                const isP1 = r.p1.uid === userUID;
+                const myChoice = isP1 ? p1 : p2;
+                const oppChoice = isP1 ? p2 : p1;
+                const amIWinner = (win === 'p1' && isP1) || (win === 'p2' && !isP1);
+
+                // Show Reveal UI
+                document.getElementById('res-me-icon').innerHTML = `<i class="fas fa-${icons[myChoice]}"></i>`;
+                document.getElementById('res-opp-icon').innerHTML = `<i class="fas fa-${icons[oppChoice]}"></i>`;
+                
+                if(win === 'draw') {
+                    document.getElementById('res-title').innerText = "DRAW";
+                    document.getElementById('res-title').className = "text-7xl font-black italic text-white tracking-tighter";
+                    document.getElementById('res-prize').innerText = "REFUNDED ฿" + r.bet;
+                } else if(amIWinner) {
+                    document.getElementById('res-title').innerText = "VICTORY";
+                    document.getElementById('res-title').className = "text-7xl font-black italic text-neon tracking-tighter";
+                    document.getElementById('res-prize').innerText = "+ ฿" + (r.bet * 2).toLocaleString();
+                    confetti({ particleCount: 250, spread: 100, origin: { y: 0.6 }, colors: ['#00F2FF', '#7C3AED', '#ffffff'] });
+                } else {
+                    document.getElementById('res-title').innerText = "DEFEAT";
+                    document.getElementById('res-title').className = "text-7xl font-black italic text-rose-600 tracking-tighter";
+                    document.getElementById('res-prize').innerText = "- ฿" + r.bet.toLocaleString();
+                }
+
+                ui.show('resultModal');
+
+                // Process Atomic Update
                 setTimeout(async () => {
-                    await runTransaction(db, async(t) => {
-                        if(win === 'draw') {
-                            const u1 = doc(db, "users", r.p1.uid), u2 = doc(db, "users", r.p2.uid);
-                            t.update(u1, { balance: (await t.get(u1)).data().balance + r.bet });
-                            t.update(u2, { balance: (await t.get(u2)).data().balance + r.bet });
-                        } else {
-                            const wUid = win === 'p1' ? r.p1.uid : r.p2.uid;
-                            const wRef = doc(db, "users", wUid);
-                            t.update(wRef, { balance: (await t.get(wRef)).data().balance + (r.bet * 2) });
-                        }
-                        t.delete(doc(db, "rooms", id));
-                    });
-                    game.exit();
-                }, 2300);
+                    try {
+                        await runTransaction(db, async (t) => {
+                            if(win === 'draw') {
+                                const u1Ref = doc(db, "users", r.p1.uid), u2Ref = doc(db, "users", r.p2.uid);
+                                t.update(u1Ref, { balance: (await t.get(u1Ref)).data().balance + r.bet });
+                                t.update(u2Ref, { balance: (await t.get(u2Ref)).data().balance + r.bet });
+                            } else {
+                                const winnerUid = win === 'p1' ? r.p1.uid : r.p2.uid;
+                                const wRef = doc(db, "users", winnerUid);
+                                t.update(wRef, { balance: (await t.get(wRef)).data().balance + (r.bet * 2) });
+                            }
+                            t.delete(doc(db, "rooms", id));
+                        });
+                    } catch(e) { console.error("Judge Error:", e); }
+                    
+                    setTimeout(() => {
+                        ui.hide('resultModal');
+                        game.exit();
+                    }, 2000);
+                }, 3000);
             },
-            exit: () => { if(unsubRoom) unsubRoom(); document.getElementById('arenaView').classList.add('hidden'); document.getElementById('choices').style.pointerEvents = 'auto'; }
+
+            exit: () => {
+                if(unsubRoom) unsubRoom();
+                ui.hide('arenaView');
+                currentRoomId = null;
+                document.getElementById('choices').style.pointerEvents = 'auto';
+                document.getElementById('choices').style.opacity = '1';
+                document.querySelectorAll('.choice-card').forEach(el => el.classList.remove('active'));
+                ui.setReadyBtn("CONFIRM READY");
+            }
         };
 
-        // 🚀 Auto-Auth Point
+        // 🚀 Initialization & Session Recovery
         window.onload = () => {
-            signInAnonymously(auth).then(() => {
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('authView').classList.remove('hidden');
-            });
+            const savedUID = localStorage.getItem('rs_pro_uid');
+            if(savedUID) {
+                userUID = savedUID;
+                app.initSession();
+            } else {
+                setTimeout(() => {
+                    ui.hide('loader');
+                    ui.show('authView');
+                }, 1500);
+            }
         };
     </script>
 </body>
