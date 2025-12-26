@@ -2,84 +2,110 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS ARENA | Ultra Smooth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RS ARENA | 1vs1 Duel Pro</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Prompt:wght@300;400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+                    colors: { neon: '#00D4FF', game: '#6366F1', dark: '#020617', gold: '#D4AF37' }
+                }
+            }
+        }
+    </script>
+
     <style>
         * { -webkit-tap-highlight-color: transparent; outline: none !important; }
-        body { background: #020617; color: #fff; font-family: 'Prompt', sans-serif; height: 100vh; overflow: hidden; }
-        .bg-cyber { background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-neon { background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); transition: 0.1s; }
-        .btn-neon:active { transform: scale(0.95); }
-        .choice-card { transition: 0.2s; background: rgba(124, 58, 237, 0.1); border: 2px solid transparent; }
-        .choice-card.active { background: #7C3AED; border-color: #fff; transform: translateY(-5px) scale(1.05); box-shadow: 0 0 30px rgba(124, 58, 237, 0.5); }
+        body { background-color: #020617; color: #f8fafc; font-family: 'Prompt', sans-serif; overflow: hidden; height: 100vh; }
+        .bg-cyber { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .btn-game { background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); transition: 0.2s; box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5); }
+        .btn-game:active { transform: scale(0.95); }
+        .choice-btn { transition: 0.2s; background: rgba(255,255,255,0.05); border: 2px solid transparent; }
+        .choice-btn.active { background: #6366F1; border-color: #fff; transform: translateY(-10px) scale(1.1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.6); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-cyber flex flex-col">
 
-    <div id="loader" class="fixed inset-0 z-[1000] bg-[#020617] flex flex-col items-center justify-center transition-all duration-500">
-        <div class="w-16 h-16 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
-        <p class="mt-4 text-purple-500 font-bold text-xs animate-pulse tracking-widest uppercase">Initializing Duel Engine</p>
+    <div id="loader" class="fixed inset-0 z-[1000] bg-dark flex flex-col items-center justify-center transition-all duration-700">
+        <div class="relative w-20 h-20 mb-6">
+            <div class="absolute inset-0 border-4 border-game/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-neon rounded-full border-t-transparent animate-spin"></div>
+            <i class="fas fa-ghost text-neon text-2xl absolute inset-0 flex items-center justify-center animate-pulse"></i>
+        </div>
+        <p class="text-neon font-black tracking-[0.4em] text-[10px] uppercase">RS Engine v3.0 Loading</p>
     </div>
 
-    <div id="authView" class="hidden fixed inset-0 z-50 p-10 flex flex-col justify-center items-center bg-[#020617]">
-        <h1 class="text-7xl font-black italic font-display mb-12 tracking-tighter">RS<span class="text-purple-500">.</span>ARENA</h1>
+    <div id="authView" class="hidden fixed inset-0 z-50 p-10 flex flex-col justify-center items-center bg-dark">
+        <div class="text-center mb-12">
+            <h1 class="text-7xl font-black text-white italic font-display tracking-tighter">RS<span class="text-neon">.</span>ARENA</h1>
+            <p class="text-slate-500 uppercase tracking-widest text-[10px] mt-2 font-bold italic">Dual Combat Terminal</p>
+        </div>
         <form onsubmit="app.login(event)" class="w-full max-w-sm space-y-4">
-            <input id="lUser" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-[2rem] text-white font-bold text-center" placeholder="รหัสผู้เล่น RSxxxx">
-            <input id="lPass" type="password" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-[2rem] text-white font-bold text-center" placeholder="รหัสผ่าน">
-            <button class="w-full bg-purple-600 py-6 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl">Connect Terminal</button>
+            <input id="lUser" type="text" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-[2.5rem] text-white font-bold text-center outline-none focus:border-neon transition-all" placeholder="RS ID (เช่น RS1234)">
+            <input id="lPass" type="password" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-[2.5rem] text-white font-bold text-center outline-none focus:border-neon transition-all" placeholder="PASSWORD">
+            <button class="w-full btn-game text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-sm shadow-2xl">Connect Terminal</button>
         </form>
     </div>
 
     <div id="lobbyView" class="hidden flex-1 flex flex-col overflow-hidden">
-        <header class="p-8 flex justify-between items-center border-b border-white/5">
-            <div><p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Combatant</p><h2 id="pName" class="text-2xl font-black italic tracking-tight">...</h2></div>
-            <div class="text-right"><p class="text-[10px] text-purple-500 font-bold uppercase mb-1">Credits</p><h2 id="pBal" class="text-2xl font-black italic text-purple-400">฿ 0.00</h2></div>
+        <header class="p-8 flex justify-between items-center border-b border-white/5 bg-black/20">
+            <div><p class="text-[9px] text-slate-500 font-bold uppercase mb-1 leading-none">Combatant</p><h2 id="pName" class="text-xl font-black italic">...</h2></div>
+            <div class="text-right"><p class="text-[9px] text-neon font-bold uppercase mb-1 leading-none">Balance</p><h2 id="pBal" class="text-xl font-black italic text-neon">฿ 0.00</h2></div>
         </header>
-        <main class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar pb-32">
-            <h3 class="text-xs font-black uppercase text-slate-500 tracking-[0.3em] mb-4">Active Battle Tables</h3>
-            <div id="roomList" class="grid gap-4"></div>
+        <main class="flex-1 overflow-y-auto px-6 py-8 pb-36 no-scrollbar">
+            <h3 class="text-2xl font-black italic uppercase mb-8 tracking-tighter">Active Lobby</h3>
+            <div id="roomList" class="grid grid-cols-1 gap-5"></div>
         </main>
+        <nav class="fixed bottom-0 w-full p-6 pb-12 bg-black/80 backdrop-blur-xl border-t border-white/5">
+            <button onclick="app.logout()" class="w-full py-4 glass text-slate-400 rounded-2xl font-black text-xs uppercase tracking-widest">Disconnect System</button>
+        </nav>
     </div>
 
-    <div id="arenaView" class="hidden fixed inset-0 z-[100] bg-[#020617] flex flex-col">
-        <header class="p-6 flex justify-between items-center border-b border-white/5">
-            <button onclick="game.exit()" class="text-[10px] font-black uppercase text-slate-500"><i class="fas fa-arrow-left mr-2"></i> Quit</button>
-            <div class="text-center"><p id="roomName" class="text-xs font-black text-purple-500 uppercase tracking-widest">Arena</p><p id="roomBet" class="text-[9px] text-slate-500 font-bold uppercase mt-1">Stake: ฿0</p></div>
-            <i class="fas fa-bolt text-purple-500 animate-pulse"></i>
+    <div id="arenaView" class="hidden fixed inset-0 z-[100] bg-dark flex flex-col fade-in">
+        <header class="p-6 flex justify-between items-center border-b border-white/5 relative z-10">
+            <button onclick="game.exit()" class="text-slate-500 font-bold text-[10px] uppercase border border-white/5 px-4 py-2 rounded-xl">Quit</button>
+            <div class="text-center"><p id="roomName" class="text-neon font-black italic text-sm uppercase">Room</p><p id="roomBet" class="text-[10px] text-slate-500 font-black">STAKE: 0</p></div>
+            <i class="fas fa-shield-virus text-neon animate-pulse text-lg"></i>
         </header>
 
-        <div class="flex-1 flex flex-col justify-around items-center p-8">
-            <div id="opp-box" class="text-center opacity-20 scale-90 transition-all duration-500">
-                <div class="w-24 h-24 bg-white/5 rounded-[2.5rem] border-2 border-white/10 flex items-center justify-center relative mb-4 mx-auto">
-                    <i id="opp-icon" class="fas fa-user-ninja text-4xl text-white/10"></i>
+        <div class="flex-1 flex flex-col justify-around items-center p-8 relative z-10">
+            <div id="opp-box" class="text-center space-y-4 opacity-20 scale-90 transition-all duration-700">
+                <div class="relative mx-auto w-24 h-24 bg-white/5 rounded-[2.5rem] border-2 border-white/10 flex items-center justify-center">
+                    <i id="opp-icon" class="fas fa-user-ninja text-white/10 text-4xl"></i>
                     <div id="opp-ready" class="hidden absolute inset-0 bg-emerald-500 flex items-center justify-center text-[10px] font-black italic rounded-[2.5rem]">READY</div>
                 </div>
-                <div id="opp-pick-status" class="hidden bg-purple-600 text-[8px] px-3 py-1 rounded-full font-black animate-pulse mx-auto w-max uppercase">กำลังเลือก...</div>
+                <div id="opp-status-badge" class="hidden bg-game text-[8px] font-black px-3 py-1 rounded-full animate-bounce mx-auto w-max uppercase">กำลังเลือก...</div>
                 <p id="opp-name" class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Waiting Rival</p>
             </div>
 
-            <div class="text-5xl font-black italic font-display text-purple-500">VS</div>
+            <div class="text-5xl font-black italic font-display text-neon animate-pulse">VS</div>
 
             <div class="text-center">
-                <div class="w-32 h-32 glass rounded-[3rem] border-2 border-purple-500/50 flex items-center justify-center relative mb-4 mx-auto shadow-2xl">
-                    <i id="my-choice-icon" class="fas fa-user text-5xl"></i>
-                    <div id="my-ready" class="hidden absolute inset-0 bg-purple-600 flex items-center justify-center text-xs font-black italic rounded-[3rem]">READY</div>
+                <div class="w-32 h-32 glass rounded-[3rem] border-4 border-neon/30 flex items-center justify-center relative mb-4 mx-auto shadow-2xl">
+                    <i id="my-choice-icon" class="fas fa-user-astronaut text-white text-5xl"></i>
+                    <div id="my-ready" class="hidden absolute inset-0 bg-neon flex items-center justify-center text-xs font-black text-dark italic rounded-[3rem]">READY</div>
                 </div>
-                <p class="text-xs font-black uppercase tracking-[0.3em]">You (Player)</p>
+                <p class="text-xs font-black uppercase tracking-widest">YOU</p>
             </div>
 
-            <div id="gameActions" class="w-full max-w-xs space-y-4">
-                <button id="readyBtn" onclick="game.readyUp()" class="w-full bg-white text-black py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-sm btn-neon active:scale-95 transition-all">ยืนยันความพร้อม</button>
+            <div id="gameActions" class="w-full max-w-sm space-y-4">
+                <button id="readyBtn" onclick="game.readyUp()" class="w-full bg-white text-black py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-sm shadow-2xl transition-all">READY TO DUEL</button>
                 <div id="choices" class="hidden grid grid-cols-3 gap-5">
-                    <button onclick="game.pick('rock')" id="btn-rock" class="choice-card h-28 rounded-3xl text-4xl"><i class="fas fa-hand-back-fist"></i></button>
-                    <button onclick="game.pick('paper')" id="btn-paper" class="choice-card h-28 rounded-3xl text-4xl"><i class="fas fa-hand-paper"></i></button>
-                    <button onclick="game.pick('scissors')" id="btn-scissors" class="choice-card h-28 rounded-3xl text-4xl"><i class="fas fa-hand-scissors"></i></button>
+                    <button onclick="game.pick('rock')" id="btn-rock" class="choice-btn h-28 rounded-3xl text-4xl"><i class="fas fa-hand-back-fist"></i></button>
+                    <button onclick="game.pick('paper')" id="btn-paper" class="choice-btn h-28 rounded-3xl text-4xl"><i class="fas fa-hand-paper"></i></button>
+                    <button onclick="game.pick('scissors')" id="btn-scissors" class="choice-btn h-28 rounded-3xl text-4xl"><i class="fas fa-hand-scissors"></i></button>
                 </div>
             </div>
         </div>
@@ -87,73 +113,83 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, runTransaction, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // 🔥 สำคัญ: ตรวจสอบ Config ของคุณ
         const firebaseConfig = { apiKey: "AIzaSyBNfTBQthLLRbJP9BXZ-UQptFsdU324Mv0", authDomain: "fafada-d9899.firebaseapp.com", projectId: "fafada-d9899", storageBucket: "fafada-d9899.firebasestorage.app", messagingSenderId: "484777586908", appId: "1:484777586908:web:16a8f0367ad15737364419" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const fb_app = initializeApp(firebaseConfig);
+        const db = getFirestore(fb_app);
 
-        let userUID = null, userData = null, unsubRoom = null, currentRoomId = null;
+        let userUID = null, userData = null, currentRoomId = null, unsubRoom = null;
 
         window.app = {
             login: async (e) => {
                 e.preventDefault();
                 const u = document.getElementById('lUser').value.trim();
                 const p = document.getElementById('lPass').value.trim();
-                Swal.showLoading();
-                // 🔹 ค้นหาแบบ Single Query เพื่อเลี่ยง Index Error และให้ความเร็วสูงสุด
-                const q = query(collection(db, "users"), where("gameUser", "==", u));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    const uDoc = snap.docs[0];
-                    if(uDoc.data().gamePass === p) {
-                        userUID = uDoc.id;
-                        localStorage.setItem('rs_arena_uid', userUID);
-                        app.initSession();
-                    } else { Swal.fire('Error', 'รหัสผ่านไม่ถูกต้อง', 'error'); }
-                } else { Swal.fire('Error', 'ไม่พบรหัสผู้เล่นนี้', 'error'); }
+                if(!u || !p) return;
+                
+                document.getElementById('loader').classList.remove('hidden');
+                try {
+                    // ✅ แก้บั๊กล็อกอิน: ค้นหาด้วย gameUser และเช็ครหัสผ่าน
+                    const q = query(collection(db, "users"), where("gameUser", "==", u));
+                    const snap = await getDocs(q);
+                    if (!snap.empty) {
+                        const userDoc = snap.docs[0];
+                        if(userDoc.data().gamePass === p) {
+                            userUID = userDoc.id;
+                            localStorage.setItem('rs_game_uid', userUID);
+                            app.initSession();
+                        } else { Swal.fire('Error', 'รหัสผ่านไม่ถูกต้อง', 'error'); document.getElementById('loader').classList.add('hidden'); }
+                    } else { Swal.fire('Error', 'ไม่พบรหัสผู้เล่นนี้', 'error'); document.getElementById('loader').classList.add('hidden'); }
+                } catch(e) { document.getElementById('loader').classList.add('hidden'); }
             },
             initSession: () => {
                 document.getElementById('authView').classList.add('hidden');
                 document.getElementById('lobbyView').classList.remove('hidden');
                 document.getElementById('loader').classList.add('hidden');
                 onSnapshot(doc(db, "users", userUID), s => {
-                    userData = s.data();
-                    document.getElementById('pName').innerText = userData.displayName || userData.gameUser;
-                    document.getElementById('pBal').innerText = "฿ " + Number(userData.balance).toLocaleString();
+                    if(s.exists()){
+                        userData = s.data();
+                        document.getElementById('pName').innerText = userData.displayName || userData.gameUser;
+                        document.getElementById('pBal').innerText = "฿ " + Number(userData.balance).toLocaleString(undefined, {minimumFractionDigits: 2});
+                    }
                 });
                 game.loadLobby();
-            }
+            },
+            logout: () => { localStorage.removeItem('rs_game_uid'); location.reload(); }
         };
 
         window.game = {
             loadLobby: () => {
-                onSnapshot(collection(db, "rooms"), s => {
-                    const l = document.getElementById('roomList'); l.innerHTML = '';
+                onSnapshot(query(collection(db, "rooms"), orderBy("createdAt", "desc")), s => {
+                    const list = document.getElementById('roomList'); list.innerHTML = '';
                     s.forEach(d => {
                         const r = d.data();
                         const card = document.createElement('div');
-                        card.className = "glass p-8 rounded-[2.5rem] flex justify-between items-center transition-all active:scale-95";
+                        card.className = "glass p-8 rounded-[2.5rem] flex justify-between items-center transition-all active:scale-95 border border-white/5";
                         card.onclick = () => game.join(d.id, r.pass);
-                        card.innerHTML = `<div><p class="text-[10px] text-purple-500 font-bold mb-1 uppercase tracking-widest">${r.name}</p><p class="text-3xl font-black italic">฿${r.bet.toLocaleString()}</p></div>
-                        <span class="text-[9px] font-black px-5 py-2 rounded-full ${r.p2?'bg-white/5':'bg-purple-600'} uppercase tracking-widest">${r.p2?'เต็ม':'เข้าประลอง'}</span>`;
-                        l.appendChild(card);
+                        card.innerHTML = `<div><p class="text-[10px] text-neon font-black uppercase mb-1">${r.name}</p><p class="text-3xl font-black italic leading-none">฿${Number(r.bet).toLocaleString()}</p></div>
+                        <span class="text-[9px] font-black px-5 py-2.5 rounded-full ${r.p2?'bg-white/5':'bg-neon text-dark'} uppercase tracking-widest">${r.p2?'FULL':'JOIN'}</span>`;
+                        list.appendChild(card);
                     });
                 });
             },
-            join: async (id, correctPass) => {
-                const { value: inputPass } = await Swal.fire({ title: 'ACCESS CODE', input: 'password', background: '#020617', color: '#fff', confirmButtonColor: '#7C3AED' });
-                if(inputPass === undefined) return;
-                // ✅ แก้บั๊กรหัสผ่านผิด (Trim และแปลงเป็น String เสมอ)
-                if(inputPass.toString().trim() === correctPass.toString().trim()) {
-                    if(userData.balance < 1) return Swal.fire('เงินไม่พอ', 'กรุณาเติมเครดิตก่อน', 'error');
+            join: async (id, pass) => {
+                const { value: p } = await Swal.fire({ title: 'ACCESS CODE', input: 'password', background: '#020617', color: '#fff', confirmButtonColor: '#00D4FF' });
+                if(p === undefined) return;
+                // ✅ แก้บั๊กรหัสผ่านผิด: แปลงเป็น String และ Trim ช่องว่าง
+                if(p.toString().trim() === pass.toString().trim()) {
+                    if(userData.balance < 1) return Swal.fire('Error', 'ยอดเงินไม่เพียงพอ', 'error');
                     currentRoomId = id;
                     const rSnap = await getDoc(doc(db, "rooms", id)); const r = rSnap.data();
-                    const field = !r.p1 || r.p1.uid === userUID ? "p1" : "p2";
+                    if(r.p2 && r.p1.uid !== userUID && r.p2.uid !== userUID) return Swal.fire('Error', 'ห้องเต็มแล้ว', 'error');
+                    
+                    const field = (!r.p1 || r.p1.uid === userUID) ? "p1" : "p2";
                     await updateDoc(doc(db, "rooms", id), { [field]: { uid: userUID, name: userData.displayName || userData.gameUser, ready: false, choice: null } });
                     document.getElementById('arenaView').classList.remove('hidden');
                     game.listenRoom(id);
-                } else { Swal.fire('Error', 'รหัสเข้าห้องไม่ถูกต้อง', 'error'); }
+                } else { Swal.fire('Error', 'รหัสผ่านห้องไม่ถูกต้อง', 'error'); }
             },
             listenRoom: (id) => {
                 unsubRoom = onSnapshot(doc(db, "rooms", id), s => {
@@ -162,14 +198,14 @@
                     document.getElementById('roomBet').innerText = "STAKE: ฿" + r.bet.toLocaleString();
                     const isP1 = r.p1 && r.p1.uid === userUID;
                     const me = isP1 ? r.p1 : r.p2; const opp = isP1 ? r.p2 : r.p1;
-                    
+
                     document.getElementById('my-ready').classList.toggle('hidden', !me?.ready);
                     if(opp) {
                         document.getElementById('opp-box').classList.remove('opacity-20', 'scale-90');
                         document.getElementById('opp-name').innerText = opp.name;
                         document.getElementById('opp-ready').classList.toggle('hidden', !opp.ready);
-                        document.getElementById('opp-pick-status').classList.toggle('hidden', !opp.choice || (r.p1.choice && r.p2.choice));
-                        document.getElementById('opp-icon').className = opp.choice ? "fas fa-check-double text-purple-500 animate-pulse text-4xl" : "fas fa-user-ninja text-white/10 text-4xl";
+                        document.getElementById('opp-status-badge').classList.toggle('hidden', !opp.choice || (r.p1.choice && r.p2.choice));
+                        document.getElementById('opp-icon').className = opp.choice ? "fas fa-check-double text-neon animate-pulse text-4xl" : "fas fa-user-ninja text-white/10 text-4xl";
                     }
 
                     if(r.p1?.ready && r.p2?.ready) {
@@ -184,15 +220,16 @@
             },
             readyUp: async () => {
                 const rSnap = await getDoc(doc(db, "rooms", currentRoomId));
-                if(userData.balance < rSnap.data().bet) return Swal.fire('Error', 'เงินไม่พอ', 'error');
+                if(userData.balance < rSnap.data().bet) return Swal.fire('Error', 'ยอดเงินไม่พอสำหรับการเดิมพันนี้', 'error');
                 await runTransaction(db, async(t) => {
                     const uRef = doc(db, "users", userUID);
-                    t.update(uRef, { balance: (await t.get(uRef)).data().balance - rSnap.data().bet });
+                    const uSnap = await t.get(uRef);
+                    t.update(uRef, { balance: uSnap.data().balance - rSnap.data().bet });
                     t.update(doc(db, "rooms", currentRoomId), { [rSnap.data().p1.uid === userUID ? "p1.ready" : "p2.ready"]: true });
                 });
             },
             pick: async (c) => {
-                document.querySelectorAll('.choice-card').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('btn-'+c).classList.add('active');
                 const isP1 = (await getDoc(doc(db, "rooms", currentRoomId))).data().p1.uid === userUID;
                 await updateDoc(doc(db, "rooms", currentRoomId), { [isP1 ? "p1.choice" : "p2.choice"]: c });
@@ -201,7 +238,7 @@
             judge: async (id, r) => {
                 const p1 = r.p1.choice, p2 = r.p2.choice;
                 const win = p1 === p2 ? 'draw' : ((p1==='rock'&&p2==='scissors')||(p1==='paper'&&p2==='rock')||(p1==='scissors'&&p2==='paper') ? 'p1' : 'p2');
-                Swal.fire({ title: 'เป่า-ยิ้ง-ฉุบ!', html: `<div class="flex justify-around text-6xl my-10"><i class="fas fa-hand-${p1==='rock'?'back-fist':p1}"></i> <i class="fas fa-hand-${p2==='rock'?'back-fist':p2}"></i></div>`, timer: 2500, showConfirmButton: false, background:'#020617', color:'#fff' });
+                Swal.fire({ title: 'REVEAL!', html: `<div class="flex justify-around text-6xl my-10"><i class="fas fa-hand-${p1==='rock'?'back-fist':p1}"></i> <i class="fas fa-hand-${p2==='rock'?'back-fist':p2}"></i></div>`, timer: 2500, showConfirmButton: false, background:'#020617', color:'#fff' });
                 setTimeout(async () => {
                     await runTransaction(db, async(t) => {
                         if(win === 'draw') {
@@ -219,11 +256,11 @@
                     game.exit();
                 }, 2200);
             },
-            exit: () => { if(unsubRoom) unsubRoom(); document.getElementById('arenaView').classList.add('hidden'); document.getElementById('choices').style.pointerEvents = 'auto'; }
+            exit: () => { if(unsubRoom) unsubRoom(); document.getElementById('arenaView').classList.add('hidden'); document.getElementById('choices').style.pointerEvents = 'auto'; document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active')); }
         };
 
         window.onload = () => {
-            const savedUID = localStorage.getItem('rs_arena_uid');
+            const savedUID = localStorage.getItem('rs_game_uid');
             if(savedUID) { userUID = savedUID; app.initSession(); } 
             else { document.getElementById('loader').classList.add('hidden'); document.getElementById('authView').classList.remove('hidden'); }
         };
