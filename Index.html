@@ -2,141 +2,83 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RS ARENA | HYPER-DUEL</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RS ARENA | Ultra Connect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;900&family=Prompt:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Prompt:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Prompt', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
-                    colors: { neon: '#00F2FF', game: '#7C3AED', dark: '#050505', gold: '#FFD700' }
-                }
-            }
-        }
-    </script>
-
     <style>
-        * { -webkit-tap-highlight-color: transparent; outline: none !important; }
-        body { background: #050505; color: #fff; font-family: 'Prompt', sans-serif; overflow: hidden; height: 100vh; }
-        
-        /* 🌌 Cyber Background */
-        .bg-cyber { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #050505 100%); }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        /* ⚡ Fast Interaction */
-        .btn-press { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-press:active { transform: scale(0.92); }
-        
-        /* ⚔️ Choice Buttons */
-        .choice-item { 
-            background: rgba(124, 58, 237, 0.1); 
-            border: 2px solid rgba(124, 58, 237, 0.3);
-            transition: 0.2s all;
-        }
-        .choice-item.active { 
-            background: #7C3AED; 
-            border-color: #fff; 
-            box-shadow: 0 0 40px rgba(124, 58, 237, 0.8);
-            transform: translateY(-10px) scale(1.05);
-        }
-
-        /* 🏆 Result Animation */
-        .win-glow { box-shadow: 0 0 50px #10B981; border: 4px solid #10B981; }
-        .lose-glow { box-shadow: 0 0 50px #EF4444; border: 4px solid #EF4444; }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { background: #050505; color: #fff; font-family: 'Prompt', sans-serif; height: 100vh; overflow: hidden; }
+        .cyber-bg { background: radial-gradient(circle at center, #1e1b4b 0%, #050505 100%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .choice-btn { transition: 0.15s; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); }
+        .choice-btn:active { transform: scale(0.9); background: #7C3AED; }
+        .choice-btn.active { background: #7C3AED; border-color: #fff; box-shadow: 0 0 30px #7C3AED; }
+        .ready-badge { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
-<body class="bg-cyber flex flex-col">
+<body class="cyber-bg flex flex-col">
 
-    <div id="loader" class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center transition-all duration-300">
-        <div class="w-16 h-16 border-[6px] border-game/10 border-t-neon rounded-full animate-spin"></div>
+    <div id="loader" class="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+        <p class="mt-4 text-purple-500 font-bold text-[10px] tracking-widest animate-pulse">BOOTING SYSTEM...</p>
     </div>
 
-    <div id="authView" class="hidden fixed inset-0 z-50 p-10 flex flex-col justify-center items-center">
-        <div class="mb-12 text-center">
-            <h1 class="text-7xl font-black italic font-display tracking-tighter">RS<span class="text-neon">.</span>ARENA</h1>
-            <p class="text-slate-500 font-bold uppercase tracking-[0.5em] text-[10px] mt-2">Elite Combat System</p>
-        </div>
-        <form onsubmit="app.login(event)" class="w-full max-w-sm space-y-4">
-            <input id="lUser" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-[2rem] text-white font-bold text-center focus:border-neon transition-all" placeholder="RS ID">
-            <input id="lPass" type="password" class="w-full px-8 py-5 bg-white/5 border border-white/10 rounded-[2rem] text-white font-bold text-center focus:border-neon transition-all" placeholder="PASSWORD">
-            <button class="w-full bg-game text-white py-6 rounded-[2rem] font-black uppercase tracking-widest btn-press shadow-2xl">Initialize</button>
+    <div id="authView" class="hidden fixed inset-0 z-50 flex flex-col justify-center items-center p-10 bg-black">
+        <h1 class="text-6xl font-black italic font-display mb-10 tracking-tighter">RS<span class="text-purple-500">.</span>ARENA</h1>
+        <form onsubmit="app.login(event)" class="w-full max-w-xs space-y-4">
+            <input id="lUser" class="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-white font-bold text-center" placeholder="รหัสผู้เล่น RSxxxx">
+            <input id="lPass" type="password" class="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-3xl text-white font-bold text-center" placeholder="รหัสผ่าน">
+            <button class="w-full bg-purple-600 py-5 rounded-3xl font-black uppercase tracking-widest shadow-xl">Connect Arena</button>
         </form>
     </div>
 
     <div id="lobbyView" class="hidden flex-1 flex flex-col overflow-hidden">
-        <header class="p-8 flex justify-between items-center">
-            <div>
-                <p id="pName" class="text-2xl font-black italic tracking-tighter">...</p>
-                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Authorized Member</p>
-            </div>
-            <div class="text-right">
-                <p id="pBal" class="text-2xl font-black text-neon italic">฿ 0.00</p>
-                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Balance Available</p>
-            </div>
+        <header class="p-6 flex justify-between items-center border-b border-white/5">
+            <div><p class="text-[9px] text-slate-500 font-bold uppercase">Combatant</p><h2 id="pName" class="text-xl font-black italic">...</h2></div>
+            <div class="text-right"><p class="text-[9px] text-purple-500 font-bold uppercase">Balance</p><h2 id="pBal" class="text-xl font-black italic text-purple-400">฿ 0.00</h2></div>
         </header>
-
-        <main class="flex-1 overflow-y-auto px-6 py-4 no-scrollbar pb-24">
-            <div class="flex justify-between items-center mb-8 px-2">
-                <h3 class="text-xs font-black uppercase tracking-[0.3em] text-white/40">Battle Lobby</h3>
-                <div class="flex items-center gap-2"><div class="w-2 h-2 bg-neon rounded-full animate-ping"></div><span class="text-[9px] font-bold">REAL-TIME SYNC</span></div>
-            </div>
+        <main class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar pb-24">
+            <h3 class="text-xs font-black uppercase text-slate-500 tracking-widest">Active Battles</h3>
             <div id="roomList" class="grid gap-4"></div>
         </main>
     </div>
 
-    <div id="arenaView" class="hidden fixed inset-0 z-[100] bg-black flex flex-col">
-        <div class="absolute inset-0 bg-cyber opacity-50"></div>
-        
-        <header class="relative p-6 flex justify-between items-center z-10">
-            <button onclick="game.exit()" class="w-12 h-12 glass rounded-2xl flex items-center justify-center btn-press"><i class="fas fa-arrow-left text-xs"></i></button>
-            <div class="text-center">
-                <p id="roomName" class="text-xs font-black uppercase tracking-widest text-neon">...</p>
-                <p id="roomBet" class="text-[9px] font-bold text-white/40 uppercase">Stake: ฿0</p>
-            </div>
-            <div class="w-12 h-12 flex items-center justify-center"><i class="fas fa-shield-virus text-game text-xl"></i></div>
-        </header>
+    <div id="arenaView" class="hidden fixed inset-0 z-[100] bg-black flex flex-col p-6">
+        <div class="flex justify-between items-center mb-10">
+            <button onclick="game.exit()" class="text-[10px] font-black uppercase text-slate-500"><i class="fas fa-times mr-2"></i> Quit</button>
+            <div class="text-center"><p id="roomName" class="text-xs font-black text-purple-500 uppercase">Room</p><p id="roomBet" class="text-[9px] text-slate-500 font-bold">STAKE: 0</p></div>
+            <i class="fas fa-bolt text-purple-500"></i>
+        </div>
 
-        <div class="relative flex-1 flex flex-col justify-around items-center z-10 px-8">
-            
-            <div id="opp-box" class="text-center transition-all duration-500 opacity-20 scale-90">
-                <div class="relative mb-4">
-                    <div id="opp-frame" class="w-24 h-24 bg-white/5 rounded-[2.5rem] border-2 border-white/10 flex items-center justify-center relative overflow-hidden">
-                        <i id="opp-icon" class="fas fa-user-secret text-white/20 text-4xl"></i>
-                        <div id="opp-ready-tag" class="hidden absolute inset-0 bg-neon/80 flex items-center justify-center text-[10px] font-black text-black italic">READY</div>
-                    </div>
-                    <div id="opp-status" class="hidden absolute -bottom-2 -right-2 bg-game text-[8px] px-3 py-1.5 rounded-full font-black animate-pulse">PICKING...</div>
+        <div class="flex-1 flex flex-col justify-between items-center py-10">
+            <div id="opp-box" class="text-center opacity-20 scale-90 transition-all duration-500">
+                <div class="w-24 h-24 bg-white/5 rounded-[2.5rem] border-2 border-white/10 flex items-center justify-center relative mb-2 mx-auto">
+                    <i id="opp-icon" class="fas fa-user-ninja text-3xl text-white/20"></i>
+                    <div id="opp-ready" class="hidden absolute inset-0 bg-emerald-500/80 flex items-center justify-center text-[10px] font-black italic rounded-[2.5rem]">READY</div>
                 </div>
-                <p id="opp-name" class="text-[10px] font-black uppercase text-white/60 tracking-widest">Waiting Rival</p>
+                <p id="opp-name" class="text-[10px] font-black uppercase text-slate-500">Waiting...</p>
             </div>
 
-            <div class="flex flex-col items-center">
-                <div class="text-5xl font-black italic font-display text-transparent bg-clip-text bg-gradient-to-b from-neon to-game animate-pulse">VS</div>
-            </div>
+            <div class="text-4xl font-black italic font-display text-purple-500 animate-pulse">VS</div>
 
             <div class="text-center">
-                <div id="my-frame" class="w-32 h-32 glass rounded-[3rem] border-2 border-neon/50 flex items-center justify-center shadow-2xl relative overflow-hidden mb-4">
-                    <i id="my-choice-icon" class="fas fa-user text-white text-5xl"></i>
-                    <div id="my-ready-tag" class="hidden absolute inset-0 bg-neon flex items-center justify-center text-xs font-black text-black italic">PREPARED</div>
+                <div class="w-32 h-32 glass rounded-[3rem] border-2 border-purple-500/50 flex items-center justify-center relative mb-4 mx-auto shadow-2xl shadow-purple-500/20">
+                    <i id="my-choice-icon" class="fas fa-user text-5xl"></i>
+                    <div id="my-ready" class="hidden absolute inset-0 bg-purple-600 flex items-center justify-center text-xs font-black italic rounded-[3rem]">READY</div>
                 </div>
-                <p class="text-xs font-black uppercase text-white tracking-[0.3em]">You (Player)</p>
+                <p class="text-xs font-black uppercase tracking-widest">YOU</p>
             </div>
 
-            <div id="gameActions" class="w-full max-w-sm pb-10">
-                <button id="readyBtn" onclick="game.readyUp()" class="w-full bg-white text-black py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-sm btn-press shadow-2xl shadow-white/10">Ready Up</button>
-                
-                <div id="choices" class="hidden grid grid-cols-3 gap-6">
-                    <button onclick="game.pick('rock')" id="btn-rock" class="choice-item h-28 rounded-[2.5rem] flex items-center justify-center text-4xl btn-press"><i class="fas fa-hand-back-fist"></i></button>
-                    <button onclick="game.pick('paper')" id="btn-paper" class="choice-item h-28 rounded-[2.5rem] flex items-center justify-center text-4xl btn-press"><i class="fas fa-hand-paper"></i></button>
-                    <button onclick="game.pick('scissors')" id="btn-scissors" class="choice-item h-28 rounded-[2.5rem] flex items-center justify-center text-4xl btn-press"><i class="fas fa-hand-scissors"></i></button>
+            <div class="w-full max-w-xs space-y-4">
+                <button id="readyBtn" onclick="game.readyUp()" class="w-full bg-white text-black py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm">กดเพื่อพร้อมเล่น</button>
+                <div id="choices" class="hidden grid grid-cols-3 gap-4">
+                    <button onclick="game.pick('rock')" id="btn-rock" class="choice-btn h-24 rounded-3xl text-3xl"><i class="fas fa-hand-back-fist"></i></button>
+                    <button onclick="game.pick('paper')" id="btn-paper" class="choice-btn h-24 rounded-3xl text-3xl"><i class="fas fa-hand-paper"></i></button>
+                    <button onclick="game.pick('scissors')" id="btn-scissors" class="choice-btn h-24 rounded-3xl text-3xl"><i class="fas fa-hand-scissors"></i></button>
                 </div>
             </div>
         </div>
@@ -144,10 +86,12 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, runTransaction, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBNfTBQthLLRbJP9BXZ-UQptFsdU324Mv0", authDomain: "fafada-d9899.firebaseapp.com", projectId: "fafada-d9899", storageBucket: "fafada-d9899.firebasestorage.app", messagingSenderId: "484777586908", appId: "1:484777586908:web:16a8f0367ad15737364419" };
         const fb_app = initializeApp(firebaseConfig);
+        const auth = getAuth(fb_app);
         const db = getFirestore(fb_app);
 
         let userUID = null, userData = null, unsubRoom = null, currentRoomId = null;
@@ -157,20 +101,13 @@
                 e.preventDefault();
                 const u = document.getElementById('lUser').value.trim();
                 const p = document.getElementById('lPass').value.trim();
-                if(!u || !p) return;
-                
-                document.getElementById('loader').classList.remove('hidden');
-                try {
-                    const q = query(collection(db, "users"), where("gameUser", "==", u), where("gamePass", "==", p));
-                    const snap = await getDocs(q);
-                    if (!snap.empty) {
-                        userUID = snap.docs[0].id;
-                        app.initSession();
-                    } else {
-                        Swal.fire('Denied', 'Incorrect Credentials', 'error');
-                        document.getElementById('loader').classList.add('hidden');
-                    }
-                } catch(e) { document.getElementById('loader').classList.add('hidden'); }
+                Swal.showLoading();
+                const q = query(collection(db, "users"), where("gameUser", "==", u), where("gamePass", "==", p));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    userUID = snap.docs[0].id;
+                    app.initSession();
+                } else { Swal.fire('Error', 'รหัสไม่ถูกต้อง', 'error'); }
             },
             initSession: () => {
                 document.getElementById('authView').classList.add('hidden');
@@ -191,23 +128,20 @@
                     const list = document.getElementById('roomList'); list.innerHTML = '';
                     s.forEach(d => {
                         const r = d.data();
-                        list.innerHTML += `<div onclick="game.join('${d.id}', '${r.pass}')" class="glass p-8 rounded-[2.5rem] flex justify-between items-center btn-press border-white/5">
-                            <div><p class="text-[10px] text-neon font-black mb-1">${r.name}</p><p class="text-3xl font-black italic">฿${Number(r.bet).toLocaleString()}</p></div>
-                            <div class="text-right"><span class="text-[9px] font-black px-4 py-2 rounded-full ${r.p2 ? 'bg-rose-500/10 text-rose-500':'bg-neon/10 text-neon'} border border-white/10 uppercase">${r.p2 ? 'FULL':'OPEN'}</span></div>
+                        list.innerHTML += `<div onclick="game.join('${d.id}', '${r.pass}')" class="glass p-7 rounded-[2.5rem] flex justify-between items-center transition-all active:scale-95">
+                            <div><p class="text-[9px] text-purple-500 font-bold mb-1">ROOM: ${r.name}</p><p class="text-2xl font-black italic">฿${r.bet}</p></div>
+                            <span class="text-[9px] font-black px-4 py-2 rounded-full ${r.p2?'bg-white/5':'bg-purple-500 text-white'} uppercase">${r.p2?'เต็ม':'เข้าเล่น'}</span>
                         </div>`;
                     });
                 });
             },
             join: async (id, pass) => {
-                const { value: p } = await Swal.fire({ title: 'ACCESS CODE', input: 'password', background:'#050505', color:'#fff', confirmButtonColor:'#7C3AED' });
+                const { value: p } = await Swal.fire({ title: 'ACCESS CODE', input: 'password', background: '#000', color: '#fff', confirmButtonColor: '#7C3AED' });
                 if(p === pass) {
                     currentRoomId = id;
                     const rSnap = await getDoc(doc(db, "rooms", id)); const r = rSnap.data();
-                    if(r.p2 && r.p1.uid !== userUID && r.p2.uid !== userUID) return Swal.fire('Error', 'Room is full', 'error');
-                    
                     const field = !r.p1 || r.p1.uid === userUID ? "p1" : "p2";
                     await updateDoc(doc(db, "rooms", id), { [field]: { uid: userUID, name: userData.displayName, ready: false, choice: null } });
-                    
                     document.getElementById('arenaView').classList.remove('hidden');
                     game.listenRoom(id);
                 }
@@ -216,21 +150,16 @@
                 unsubRoom = onSnapshot(doc(db, "rooms", id), s => {
                     const r = s.data(); if(!r) return;
                     document.getElementById('roomName').innerText = r.name;
-                    document.getElementById('roomBet').innerText = `STAKE: ฿${r.bet}`;
-                    
+                    document.getElementById('roomBet').innerText = "STAKE: " + r.bet;
                     const isP1 = r.p1 && r.p1.uid === userUID;
                     const me = isP1 ? r.p1 : r.p2; const opp = isP1 ? r.p2 : r.p1;
-
-                    // Optimistic UI for Me
-                    document.getElementById('my-ready-tag').classList.toggle('hidden', !me?.ready);
                     
+                    document.getElementById('my-ready').classList.toggle('hidden', !me?.ready);
                     if(opp) {
                         document.getElementById('opp-box').classList.remove('opacity-20', 'scale-90');
-                        document.getElementById('opp-box').classList.add('opacity-100', 'scale-100');
                         document.getElementById('opp-name').innerText = opp.name;
-                        document.getElementById('opp-ready-tag').classList.toggle('hidden', !opp.ready);
-                        document.getElementById('opp-status').classList.toggle('hidden', !opp.choice || (r.p1.choice && r.p2.choice));
-                        document.getElementById('opp-icon').className = opp.choice ? "fas fa-check-double text-neon text-4xl" : "fas fa-user-secret text-white/20 text-4xl";
+                        document.getElementById('opp-ready').classList.toggle('hidden', !opp.ready);
+                        document.getElementById('opp-icon').className = opp.choice ? "fas fa-check-double text-purple-500 animate-pulse text-3xl" : "fas fa-user-ninja text-white/20 text-3xl";
                     }
 
                     if(r.p1?.ready && r.p2?.ready) {
@@ -244,67 +173,51 @@
                 });
             },
             readyUp: async () => {
-                // Optimistic UI
-                document.getElementById('readyBtn').innerText = "WAITING FOR SYNC...";
-                const rSnap = await getDoc(doc(db, "rooms", currentRoomId)); const r = rSnap.data();
-                
+                const rSnap = await getDoc(doc(db, "rooms", currentRoomId));
+                if(userData.balance < rSnap.data().bet) return Swal.fire('Error', 'เงินไม่พอ', 'error');
                 await runTransaction(db, async(t) => {
                     const uRef = doc(db, "users", userUID);
-                    const uSnap = await t.get(uRef);
-                    if(uSnap.data().balance < r.bet) throw "Insufficient Balance";
-                    
-                    t.update(uRef, { balance: uSnap.data().balance - r.bet });
-                    const isP1 = r.p1.uid === userUID;
-                    t.update(doc(db, "rooms", currentRoomId), { [isP1 ? "p1.ready" : "p2.ready"]: true });
-                }).catch(e => { Swal.fire('Error', 'ยอดเงินไม่พอ', 'error'); document.getElementById('readyBtn').innerText = "Ready Up"; });
+                    t.update(uRef, { balance: (await t.get(uRef)).data().balance - rSnap.data().bet });
+                    t.update(doc(db, "rooms", currentRoomId), { [rSnap.data().p1.uid === userUID ? "p1.ready" : "p2.ready"]: true });
+                });
             },
             pick: async (c) => {
-                // Instant Feedback
-                document.querySelectorAll('.choice-item').forEach(el => el.classList.remove('active'));
-                document.getElementById(`btn-${c}`).classList.add('active');
-                
-                const rData = (await getDoc(doc(db, "rooms", currentRoomId))).data();
-                const isP1 = rData.p1.uid === userUID;
+                document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('btn-'+c).classList.add('active');
+                const isP1 = (await getDoc(doc(db, "rooms", currentRoomId))).data().p1.uid === userUID;
                 await updateDoc(doc(db, "rooms", currentRoomId), { [isP1 ? "p1.choice" : "p2.choice"]: c });
                 document.getElementById('choices').style.pointerEvents = 'none';
             },
             judge: async (id, r) => {
                 const p1 = r.p1.choice, p2 = r.p2.choice;
-                let win = p1 === p2 ? 'draw' : ((p1==='rock'&&p2==='scissors')||(p1==='paper'&&p2==='rock')||(p1==='scissors'&&p2==='paper') ? 'p1' : 'p2');
-                
-                Swal.fire({ 
-                    title: 'DUEL REVEAL!', 
-                    html: `<div class="flex justify-around text-6xl my-10"><i class="fas fa-hand-${p1==='rock'?'back-fist':p1}"></i> <i class="fas fa-hand-${p2==='rock'?'back-fist':p2}"></i></div>`, 
-                    timer: 3000, showConfirmButton: false, background: '#050505', color: '#fff' 
-                });
-
+                const win = p1 === p2 ? 'draw' : ((p1==='rock'&&p2==='scissors')||(p1==='paper'&&p2==='rock')||(p1==='scissors'&&p2==='paper') ? 'p1' : 'p2');
+                Swal.fire({ title: 'REVEAL!', html: `<div class="flex justify-around text-5xl my-10"><i class="fas fa-hand-${p1==='rock'?'back-fist':p1}"></i> <i class="fas fa-hand-${p2==='rock'?'back-fist':p2}"></i></div>`, timer: 2500, showConfirmButton: false, background:'#000', color:'#fff' });
                 setTimeout(async () => {
-                    await runTransaction(db, async (t) => {
+                    await runTransaction(db, async(t) => {
                         if(win === 'draw') {
-                            const u1Ref = doc(db, "users", r.p1.uid), u2Ref = doc(db, "users", r.p2.uid);
-                            t.update(u1Ref, { balance: (await t.get(u1Ref)).data().balance + r.bet });
-                            t.update(u2Ref, { balance: (await t.get(u2Ref)).data().balance + r.bet });
+                            const u1 = doc(db, "users", r.p1.uid), u2 = doc(db, "users", r.p2.uid);
+                            t.update(u1, { balance: (await t.get(u1)).data().balance + r.bet });
+                            t.update(u2, { balance: (await t.get(u2)).data().balance + r.bet });
                         } else {
-                            const winnerUid = win === 'p1' ? r.p1.uid : r.p2.uid;
-                            const wRef = doc(db, "users", winnerUid);
+                            const wUid = win === 'p1' ? r.p1.uid : r.p2.uid;
+                            const wRef = doc(db, "users", wUid);
                             t.update(wRef, { balance: (await t.get(wRef)).data().balance + (r.bet * 2) });
-                            if(winnerUid === userUID) confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
                         }
                         t.delete(doc(db, "rooms", id));
                     });
                     game.exit();
-                }, 2800);
+                }, 2300);
             },
-            exit: () => { 
-                if(unsubRoom) unsubRoom(); 
-                document.getElementById('arenaView').classList.add('hidden'); 
-                document.getElementById('choices').style.pointerEvents = 'auto';
-                document.querySelectorAll('.choice-item').forEach(el => el.classList.remove('active'));
-                document.getElementById('readyBtn').innerText = "Ready Up";
-            }
+            exit: () => { if(unsubRoom) unsubRoom(); document.getElementById('arenaView').classList.add('hidden'); document.getElementById('choices').style.pointerEvents = 'auto'; }
         };
 
-        window.onload = () => { setTimeout(() => { document.getElementById('loader').classList.add('hidden'); document.getElementById('authView').classList.remove('hidden'); }, 1000); };
+        // 🚀 Auto-Auth Point
+        window.onload = () => {
+            signInAnonymously(auth).then(() => {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('authView').classList.remove('hidden');
+            });
+        };
     </script>
 </body>
 </html>
